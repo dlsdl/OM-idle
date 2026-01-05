@@ -1,8 +1,29 @@
 <template>
   <div class="inherited-ternary">
+    <!-- 导航链接 -->
+    <div class="nav-link">
+      <router-link to="/">返回游戏首页</router-link>
+    </div>
+
     <div class="header">
-      <h1>继承3进制表示转换器</h1>
-      <p class="subtitle">将自然数转换为继承3进制表示</p>
+      <h1>3进制ω序数与ψ-Ω序数表示转换器</h1>
+      <p class="subtitle">将自然数转换为3进制ω序数或ψ-Ω序数表示</p>
+    </div>
+
+    <!-- 转换类型选项卡 -->
+    <div class="tabs">
+      <button 
+        :class="['tab-btn', { active: activeTab === 'inherited' }]" 
+        @click="activeTab = 'inherited'"
+      >
+        ω序数表示
+      </button>
+      <button 
+        :class="['tab-btn', { active: activeTab === 'psiomega' }]" 
+        @click="activeTab = 'psiomega'"
+      >
+        ψ-Ω序数表示
+      </button>
     </div>
 
     <div class="input-section">
@@ -22,6 +43,7 @@
         <span>示例：</span>
         <button @click="setExample(7625597484986)">7625597484986</button>
         <button @click="setExample(Number.MAX_SAFE_INTEGER)">Max_safe_integer</button>
+        <button @click="setExample(12157665459056920000)">3^40-1</button>
         <button @click="setExample(Number.MAX_VALUE)">Max_value</button>
       </div>
     </div>
@@ -36,7 +58,8 @@
         <div class="result-expression" v-html="result"></div>
       </div>
 
-      <div v-if="steps.length > 0" class="steps-section">
+      <!-- 仅在继承3进制模式下显示转换步骤 -->
+      <div v-if="steps.length > 0 && activeTab === 'inherited'" class="steps-section">
         <h2>转换步骤</h2>
         <div class="steps-list">
           <div v-for="(step, index) in steps" :key="index" class="step-item">
@@ -52,24 +75,29 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { convertToInheritedTernary } from '../utils/inheritedTernary'
+import { convertToInheritedTernary, convertToPsiOmega } from '../utils/inheritedTernary'
 import type { ConversionStep } from '../types'
 
+// 状态管理
 const inputNumber = ref<number | null>(null)
 const result = ref('')
 const steps = ref<ConversionStep[]>([])
 const error = ref('')
+const activeTab = ref<'inherited' | 'psiomega'>('inherited')
 
+// 设置示例数字
 function setExample(n: number): void {
   inputNumber.value = n
   convert()
 }
 
+// 主转换函数
 function convert(): void {
   error.value = ''
   result.value = ''
   steps.value = []
 
+  // 输入验证
   if (inputNumber.value === null) {
     error.value = '请输入一个数字'
     return
@@ -85,9 +113,21 @@ function convert(): void {
     return
   }
 
-  const conversion = convertToInheritedTernary(inputNumber.value)
-  result.value = conversion.result
-  steps.value = conversion.steps
+  // 根据选中的选项卡执行不同的转换
+  if (activeTab.value === 'inherited') {
+    // 执行继承3进制转换
+    const conversion = convertToInheritedTernary(inputNumber.value)
+    result.value = conversion.result
+    steps.value = conversion.steps
+  } else {
+    // 执行ψ-Ω表示转换
+    const conversion = convertToPsiOmega(inputNumber.value)
+    if (conversion.error) {
+      error.value = conversion.error
+    } else {
+      result.value = conversion.result
+    }
+  }
 }
 </script>
 
@@ -97,6 +137,22 @@ function convert(): void {
   margin: 0 auto;
   padding: 2rem;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* 导航链接 */
+.nav-link {
+  margin-bottom: 1rem;
+  text-align: right;
+}
+
+.nav-link a {
+  color: #4a90e2;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.nav-link a:hover {
+  text-decoration: underline;
 }
 
 .header {
@@ -113,6 +169,37 @@ function convert(): void {
 .subtitle {
   color: #666;
   font-size: 1rem;
+}
+
+/* 选项卡样式 */
+.tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  background: #f5f5f5;
+  padding: 0.5rem;
+  border-radius: 8px;
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border: none;
+  border-radius: 4px;
+  background: white;
+  color: #666;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tab-btn:hover {
+  background: #e8e8e8;
+}
+
+.tab-btn.active {
+  background: #4a90e2;
+  color: white;
 }
 
 .input-section {

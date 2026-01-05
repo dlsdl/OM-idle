@@ -1,11 +1,11 @@
 <template>
-  <div id="app" class="game-container">
-    <Game />
+  <div id="app" class="app-container">
+    <router-view />
   </div>
 </template>
 
 <script setup lang="ts">
-import Game from './components/Game.vue'
+// 路由会自动处理组件的渲染
 </script>
 
 <style>
@@ -18,12 +18,12 @@ import Game from './components/Game.vue'
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   min-height: 100vh;
-  overflow: hidden;
+  overflow: auto;
 }
 
-.game-container {
+.app-container {
   width: 100vw;
-  height: 100vh;
+  min-height: 100vh;
   background: #000;
 }
 </style>

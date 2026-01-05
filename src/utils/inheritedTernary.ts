@@ -1,5 +1,50 @@
 import type { Term, ConversionStep } from '../types'
 
+// 定义ψ-Ω表示的映射关系
+const psiOmegaMap: Record<number, string> = {
+  1: 'ψ(Ωx)',
+  2: 'ψ(Ω<sup>2</sup>x)',
+  3: 'ψ(Ω<sup>x</sup>)',
+  4: 'ψ(Ω<sup>Ω</sup>x)',
+  5: 'ψ(Ω<sup>Ω+1</sup>x)',
+  6: 'ψ(Ω<sup>Ω+2</sup>x)',
+  7: 'ψ(Ω<sup>Ω+x</sup>)',
+  8: 'ψ(Ω<sup>Ω2</sup>x)',
+  9: 'ψ(Ω<sup>Ω2+1</sup>x)',
+  10: 'ψ(Ω<sup>Ω2+2</sup>x)',
+  11: 'ψ(Ω<sup>Ω2+x</sup>)',
+  12: 'ψ(Ω<sup>Ωx</sup>)',
+  13: 'ψ(Ω<sup>Ω<sup>2</sup></sup>x)',
+  14: 'ψ(Ω<sup>Ω<sup>2</sup>+1</sup>x)',
+  15: 'ψ(Ω<sup>Ω<sup>2</sup>+2</sup>x)',
+  16: 'ψ(Ω<sup>Ω<sup>2</sup>+x</sup>)',
+  17: 'ψ(Ω<sup>Ω<sup>2</sup>+Ω</sup>x)',
+  18: 'ψ(Ω<sup>Ω<sup>2</sup>+Ω+1</sup>x)',
+  19: 'ψ(Ω<sup>Ω<sup>2</sup>+Ω+2</sup>x)',
+  20: 'ψ(Ω<sup>Ω<sup>2</sup>+Ω+x</sup>)',
+  21: 'ψ(Ω<sup>Ω<sup>2</sup>+Ω2</sup>x)',
+  22: 'ψ(Ω<sup>Ω<sup>2</sup>+Ω2+1</sup>x)',
+  23: 'ψ(Ω<sup>Ω<sup>2</sup>+Ω2+2</sup>x)',
+  24: 'ψ(Ω<sup>Ω<sup>2</sup>+Ω2+x</sup>)',
+  25: 'ψ(Ω<sup>Ω<sup>2</sup>+Ωx</sup>)',
+  26: 'ψ(Ω<sup>Ω<sup>2</sup>2</sup>x)',
+  27: 'ψ(Ω<sup>Ω<sup>2</sup>2+1</sup>x)',
+  28: 'ψ(Ω<sup>Ω<sup>2</sup>2+2</sup>x)',
+  29: 'ψ(Ω<sup>Ω<sup>2</sup>2+x</sup>)',
+  30: 'ψ(Ω<sup>Ω<sup>2</sup>2+Ω</sup>x)',
+  31: 'ψ(Ω<sup>Ω<sup>2</sup>2+Ω+1</sup>x)',
+  32: 'ψ(Ω<sup>Ω<sup>2</sup>2+Ω+2</sup>x)',
+  33: 'ψ(Ω<sup>Ω<sup>2</sup>2+Ω+x</sup>)',
+  34: 'ψ(Ω<sup>Ω<sup>2</sup>2+Ω2</sup>x)',
+  35: 'ψ(Ω<sup>Ω<sup>2</sup>2+Ω2+1</sup>x)',
+  36: 'ψ(Ω<sup>Ω<sup>2</sup>2+Ω2+2</sup>x)',
+  37: 'ψ(Ω<sup>Ω<sup>2</sup>2+Ω2+x</sup>)',
+  38: 'ψ(Ω<sup>Ω<sup>2</sup>2+Ωx</sup>)',
+  39: 'ψ(Ω<sup>Ω<sup>2</sup>x</sup>)',
+  40: 'ψ(Ω<sup>Ω<sup>x</sup></sup>)',
+}
+
+// 辅助函数：将整数转换为三进制表示（从高位到低位）
 function toTernary(n: number): number[] {
   if (n === 0) return [0]
   const digits: number[] = []
@@ -10,15 +55,57 @@ function toTernary(n: number): number[] {
   return digits
 }
 
+// ψ-Ω表示的核心转换算法
+function convertToPsiOmega(n: number): { result: string; error?: string } {
+  // 验证输入
+  if (!Number.isInteger(n)) {
+    return { result: '', error: '请输入整数' }
+  }
+  if (n < 0) {
+    return { result: '', error: '请输入非负整数' }
+  }
+  if (n === 0) {
+    return { result: 'x' }
+  }
+
+  // 第一步：将数字转换为三进制表示
+  const ternaryDigits = toTernary(n)
+  let result = 'x'
+
+  // 第二步：从高位到低位进行嵌套转换
+  for (let i = 0; i < ternaryDigits.length; i++) {
+    const digit = ternaryDigits[i]
+    if (digit === 0) {
+      continue // 跳过0位
+    }
+
+    // 获取当前位对应的映射字符串
+    const level = i + 1
+    const basePattern = psiOmegaMap[level] || `😰x`
+
+    // 根据位上的数字进行嵌套
+    let nestedResult = result
+    for (let j = 0; j < digit; j++) {
+      nestedResult = basePattern.replace('x', nestedResult)
+    }
+
+    result = nestedResult
+  }
+
+  return { result }
+}
+
+function remnant(n: number): string {
+  return n<1/6?'':n<2/6?'2':n<3/6?'ω':n<4/6?'ω<sup>2</sup>':n<5/6?'ω<sup>ω</sup>':n<1?'ω<sup>ω<sup>2</sup></sup>':''
+}
+
+// 原始的继承3进制表示转换函数
 function convertToInheritedTernary(n: number): { result: string; steps: ConversionStep[] } {
   if (n < 0) {
     return { result: '请输入非负整数', steps: [] }
   }
   if (n === 0) {
     return { result: '0', steps: [{ step: 1, description: '0的继承3进制表示', expression: '0' }] }
-  }
-  if(n >= 7625597484987) {
-    return { result: 'ψ(Ω)', steps: [] }
   }
 
   const steps: ConversionStep[] = []
@@ -81,7 +168,6 @@ function convertToInheritedTernary(n: number): { result: string; steps: Conversi
       } else {
         // 处理已经是数组的指数，检查其中是否有大指数
         const newExpTerms: Term[] = []
-        let expHasLarge = false
         
         for (const subTerm of term.exponent) {
           if (typeof subTerm.exponent === 'number') {
@@ -103,7 +189,6 @@ function convertToInheritedTernary(n: number): { result: string; steps: Conversi
                 exponent: expSubTerms,
                 coefficient: subTerm.coefficient
               })
-              expHasLarge = true
               hasLargeExp = true
             } else {
               newExpTerms.push(subTerm)
@@ -150,8 +235,10 @@ function convertToInheritedTernary(n: number): { result: string; steps: Conversi
   return { result, steps }
 }
 
-export { convertToInheritedTernary }
+// 导出函数
+export { convertToInheritedTernary, convertToPsiOmega, remnant, toTernary }
 
+// 辅助函数：格式化术语（仅用于原始继承3进制表示）
 function formatTerm(term: Term): string {
   const exp = term.exponent
   const coeff = term.coefficient
