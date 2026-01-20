@@ -6,8 +6,8 @@
     </div>
 
     <div class="header">
-      <h1>3进制ω序数与ψ-Ω序数表示转换器</h1>
-      <p class="subtitle">将自然数转换为3进制ω序数或ψ-Ω序数表示</p>
+      <h1>继承3进制、ψ-Ω、ψ-Ω-2表示转换器</h1>
+      <p class="subtitle">将自然数转换为继承3进制表示、ψ-Ω表示或ψ-Ω-2表示</p>
     </div>
 
     <!-- 转换类型选项卡 -->
@@ -16,13 +16,19 @@
         :class="['tab-btn', { active: activeTab === 'inherited' }]" 
         @click="activeTab = 'inherited'"
       >
-        ω序数表示
+        继承3进制表示
       </button>
       <button 
         :class="['tab-btn', { active: activeTab === 'psiomega' }]" 
         @click="activeTab = 'psiomega'"
       >
-        ψ-Ω序数表示
+        ψ-Ω表示
+      </button>
+      <button 
+        :class="['tab-btn', { active: activeTab === 'psiomega2' }]" 
+        @click="activeTab = 'psiomega2'"
+      >
+        ψ-Ω-2表示
       </button>
     </div>
 
@@ -75,7 +81,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { convertToInheritedTernary, convertToPsiOmega } from '../utils/inheritedTernary'
+import { convertToInheritedTernary, convertToPsiOmega, convertToPsiOmega2 } from '../utils/inheritedTernary'
 import type { ConversionStep } from '../types'
 
 // 状态管理
@@ -83,7 +89,7 @@ const inputNumber = ref<number | null>(null)
 const result = ref('')
 const steps = ref<ConversionStep[]>([])
 const error = ref('')
-const activeTab = ref<'inherited' | 'psiomega'>('inherited')
+const activeTab = ref<'inherited' | 'psiomega' | 'psiomega2'>('inherited')
 
 // 设置示例数字
 function setExample(n: number): void {
@@ -119,9 +125,17 @@ function convert(): void {
     const conversion = convertToInheritedTernary(inputNumber.value)
     result.value = conversion.result
     steps.value = conversion.steps
-  } else {
+  } else if (activeTab.value === 'psiomega') {
     // 执行ψ-Ω表示转换
     const conversion = convertToPsiOmega(inputNumber.value)
+    if (conversion.error) {
+      error.value = conversion.error
+    } else {
+      result.value = conversion.result
+    }
+  } else {
+    // 执行ψ-Ω-2表示转换
+    const conversion = convertToPsiOmega2(inputNumber.value)
     if (conversion.error) {
       error.value = conversion.error
     } else {

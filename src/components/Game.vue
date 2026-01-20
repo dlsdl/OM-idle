@@ -93,7 +93,7 @@
 
         <div class="current-value">
           康托尔点: {{ formatNumber(cantorPoints) }}(总计{{ formatNumber(totalCantorPoints) }}) | 序数点2: {{ formatNumber(value2) }} | 增幅: {{ formatNumber(incrementy) }}<br />
-          总计康托尔点使自动器速度×{{ formatNumber(totalCantorPoints*3+1) }}<br />
+          总计康托尔点使自动器速度×{{ formatNumber(Math.sqrt(totalCantorPoints * 8 + 1)) }}<br />
           增幅使所有自动器速度×{{ formatNumber(incrementy + 1) }}
         </div><br />
 
@@ -291,7 +291,7 @@ let gameLoop: number | null = null
 
 // 计算属性 - 原始数值生产速度
 const productionPerSecond = computed(() => {
-  return automatorLevel.value * Math.pow(2, amplifierLevel.value) * (totalCantorPoints.value*3 + 1) * (1 + incrementy.value)
+  return automatorLevel.value * Math.pow(2, amplifierLevel.value) * Math.sqrt(totalCantorPoints.value*8 + 1) * (1 + incrementy.value)
 })
 
 // 计算属性 - 康托尔自动器生产速度

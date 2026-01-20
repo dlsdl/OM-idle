@@ -1,4 +1,60 @@
 import type { Term, ConversionStep } from '../types'
+// 定义ψ-Ω-2表示的映射关系
+const psiOmega2Map: Record<number, string> = {
+  1: 'ψ(Ωx)',
+  2: 'ψ(Ω<sup>2</sup>x)',
+  3: 'ψ(Ω<sup>x</sup>)',
+  4: 'ψ(Ω<sup>Ω+x</sup>)',
+  5: 'ψ(Ω<sup>Ωx</sup>)',
+  6: 'ψ(Ω<sup>Ω<sup>2</sup></sup>x)',
+  7: 'ψ(Ω<sup>Ω<sup>2</sup>+x</sup>)',
+  8: 'ψ(Ω<sup>Ω<sup>2</sup>+Ωx</sup>)',
+  9: 'ψ(Ω<sup>Ω<sup>2</sup>2</sup>x)',
+  10: 'ψ(Ω<sup>Ω<sup>2</sup>2+x</sup>)',
+  11: 'ψ(Ω<sup>Ω<sup>2</sup>2+Ωx</sup>)',
+  12: 'ψ(Ω<sup>Ω<sup>2</sup>x</sup>)',
+  13: 'ψ(Ω<sup>Ω<sup>x</sup></sup>)',
+  14: 'ψ<sub>1</sub>(Ω<sub>2</sub>x)',
+  15: 'ψ<sub>1</sub>(Ω<sub>2</sub><sup>2</sup>x)',
+  16: 'ψ<sub>1</sub>(Ω<sub>2</sub><sup>x</sup>)',
+  17: 'ψ<sub>1</sub>(Ω<sub>2</sub><sup>Ω<sub>2</sub></sup>x)',
+  18: 'ψ<sub>1</sub>(Ω<sub>2</sub><sup>Ω<sub>2</sub>+1</sup>x)',
+  19: 'ψ<sub>1</sub>(Ω<sub>2</sub><sup>Ω<sub>2</sub>+2</sup>x)',
+  20: 'ψ<sub>1</sub>(Ω<sub>2</sub><sup>Ω<sub>2</sub>+x</sup>)',
+  21: 'ψ<sub>1</sub>(Ω<sub>2</sub><sup>Ω<sub>2</sub>2</sup>x)',
+  22: 'ψ<sub>1</sub>(Ω<sub>2</sub><sup>Ω<sub>2</sub>2+1</sup>x)',
+  23: 'ψ<sub>1</sub>(Ω<sub>2</sub><sup>Ω<sub>2</sub>2+2</sup>x)',
+  24: 'ψ<sub>1</sub>(Ω<sub>2</sub><sup>Ω<sub>2</sub>2+x</sup>)',
+  25: 'ψ<sub>1</sub>(Ω<sub>2</sub><sup>Ω<sub>2</sub>x</sup>)',
+  26: 'ψ<sub>1</sub>(Ω<sub>2</sub><sup>Ω<sub>2</sub><sup>2</sup></sup>x)',
+  27: 'ψ<sub>1</sub>(Ω<sub>2</sub><sup>Ω<sub>2</sub><sup>2</sup>+1</sup>x)',
+  28: 'ψ<sub>1</sub>(Ω<sub>2</sub><sup>Ω<sub>2</sub><sup>2</sup>+2</sup>x)',
+  29: 'ψ<sub>1</sub>(Ω<sub>2</sub><sup>Ω<sub>2</sub><sup>2</sup>+x</sup>)',
+  30: 'ψ<sub>1</sub>(Ω<sub>2</sub><sup>Ω<sub>2</sub><sup>2</sup>+Ω<sub>2</sub></sup>x)',
+  31: 'ψ<sub>1</sub>(Ω<sub>2</sub><sup>Ω<sub>2</sub><sup>2</sup>+Ω<sub>2</sub>+1</sup>x)',
+  32: 'ψ<sub>1</sub>(Ω<sub>2</sub><sup>Ω<sub>2</sub><sup>2</sup>+Ω<sub>2</sub>+2</sup>x)',
+  33: 'ψ<sub>1</sub>(Ω<sub>2</sub><sup>Ω<sub>2</sub><sup>2</sup>+Ω<sub>2</sub>+x</sup>)',
+  34: 'ψ<sub>1</sub>(Ω<sub>2</sub><sup>Ω<sub>2</sub><sup>2</sup>+Ω<sub>2</sub>2</sup>x)',
+  35: 'ψ<sub>1</sub>(Ω<sub>2</sub><sup>Ω<sub>2</sub><sup>2</sup>+Ω<sub>2</sub>2+1</sup>x)',
+  36: 'ψ<sub>1</sub>(Ω<sub>2</sub><sup>Ω<sub>2</sub><sup>2</sup>+Ω<sub>2</sub>2+2</sup>x)',
+  37: 'ψ<sub>1</sub>(Ω<sub>2</sub><sup>Ω<sub>2</sub><sup>2</sup>+Ω<sub>2</sub>2+x</sup>)',
+  38: 'ψ<sub>1</sub>(Ω<sub>2</sub><sup>Ω<sub>2</sub><sup>2</sup>+Ω<sub>2</sub>x</sup>)',
+  39: 'ψ<sub>1</sub>(Ω<sub>2</sub><sup>Ω<sub>2</sub><sup>2</sup>2</sup>x)',
+  40: 'ψ<sub>1</sub>(Ω<sub>2</sub><sup>Ω<sub>2</sub><sup>2</sup>2+1</sup>x)',
+  41: 'ψ<sub>1</sub>(Ω<sub>2</sub><sup>Ω<sub>2</sub><sup>2</sup>2+2</sup>x)',
+  42: 'ψ<sub>1</sub>(Ω<sub>2</sub><sup>Ω<sub>2</sub><sup>2</sup>2+x</sup>)',
+  43: 'ψ<sub>1</sub>(Ω<sub>2</sub><sup>Ω<sub>2</sub><sup>2</sup>2+Ω<sub>2</sub></sup>x)',
+  44: 'ψ<sub>1</sub>(Ω<sub>2</sub><sup>Ω<sub>2</sub><sup>2</sup>2+Ω<sub>2</sub>+1</sup>x)',
+  45: 'ψ<sub>1</sub>(Ω<sub>2</sub><sup>Ω<sub>2</sub><sup>2</sup>2+Ω<sub>2</sub>+2</sup>x)',
+  46: 'ψ<sub>1</sub>(Ω<sub>2</sub><sup>Ω<sub>2</sub><sup>2</sup>2+Ω<sub>2</sub>+x</sup>)',
+  47: 'ψ<sub>1</sub>(Ω<sub>2</sub><sup>Ω<sub>2</sub><sup>2</sup>2+Ω<sub>2</sub>2</sup>x)',
+  48: 'ψ<sub>1</sub>(Ω<sub>2</sub><sup>Ω<sub>2</sub><sup>2</sup>2+Ω<sub>2</sub>2+1</sup>x)',
+  49: 'ψ<sub>1</sub>(Ω<sub>2</sub><sup>Ω<sub>2</sub><sup>2</sup>2+Ω<sub>2</sub>2+2</sup>x)',
+  50: 'ψ<sub>1</sub>(Ω<sub>2</sub><sup>Ω<sub>2</sub><sup>2</sup>2+Ω<sub>2</sub>2+x</sup>)',
+  51: 'ψ<sub>1</sub>(Ω<sub>2</sub><sup>Ω<sub>2</sub><sup>2</sup>2+Ω<sub>2</sub>x</sup>)',
+  52: 'ψ<sub>1</sub>(Ω<sub>2</sub><sup>Ω<sub>2</sub><sup>2</sup>x</sup>)',
+  53: 'ψ<sub>1</sub>(Ω<sub>2</sub><sup>Ω<sub>2</sub><sup>x</sup></sup>)',
+}
 
 // 定义ψ-Ω表示的映射关系
 const psiOmegaMap: Record<number, string> = {
@@ -95,8 +151,48 @@ function convertToPsiOmega(n: number): { result: string; error?: string } {
   return { result }
 }
 
+// ψ-Ω-2表示的核心转换算法
+function convertToPsiOmega2(n: number): { result: string; error?: string } {
+  // 验证输入
+  if (!Number.isInteger(n)) {
+    return { result: '', error: '请输入整数' }
+  }
+  if (n < 0) {
+    return { result: '', error: '请输入非负整数' }
+  }
+  if (n === 0) {
+    return { result: 'x' }
+  }
+
+  // 第一步：将数字转换为三进制表示
+  const ternaryDigits = toTernary(n)
+  let result = 'x'
+
+  // 第二步：从高位到低位进行嵌套转换
+  for (let i = 0; i < ternaryDigits.length; i++) {
+    const digit = ternaryDigits[i]
+    if (digit === 0) {
+      continue // 跳过0位
+    }
+
+    // 获取当前位对应的映射字符串
+    const level = i + 1
+    const basePattern = psiOmega2Map[level] || `😰x`
+
+    // 根据位上的数字进行嵌套
+    let nestedResult = result
+    for (let j = 0; j < digit; j++) {
+      nestedResult = basePattern.replace('x', nestedResult)
+    }
+
+    result = nestedResult
+  }
+
+  return { result }
+}
+
 function remnant(n: number): string {
-  return n<1/6?'':n<2/6?'2':n<3/6?'ω':n<4/6?'ω<sup>2</sup>':n<5/6?'ω<sup>ω</sup>':n<1?'ω<sup>ω<sup>2</sup></sup>':''
+  return n<1/8?'ω':n<2/8?'ω2':n<3/8?'ω<sup>2</sup>':n<4/8?'ω<sup>2</sup>2':n<5/8?'ω<sup>ω</sup>':n<6/8?'ω<sup>ω2</sup>':n<7/8?'ω<sup>ω<sup>2</sup></sup>':'ω<sup>ω<sup>2</sup>2</sup>'
 }
 
 // 原始的继承3进制表示转换函数
@@ -236,7 +332,7 @@ function convertToInheritedTernary(n: number): { result: string; steps: Conversi
 }
 
 // 导出函数
-export { convertToInheritedTernary, convertToPsiOmega, remnant, toTernary }
+export { convertToInheritedTernary, convertToPsiOmega, convertToPsiOmega2, remnant, toTernary }
 
 // 辅助函数：格式化术语（仅用于原始继承3进制表示）
 function formatTerm(term: Term): string {
