@@ -185,9 +185,9 @@ function convertToPsiOmega2(n: number): { result: string; error?: string } {
       nestedResult = basePattern.replace('x', nestedResult)
     }
 
-    result = nestedResult.replace('<sub>1</sub>','')
+    result = nestedResult
   }
-
+  result = result.replace(/1/,'')
   return { result }
 }
 
