@@ -1,19 +1,19 @@
 import type { Term, ConversionStep } from '../types'
 // 定义ψ-Ω-2表示的映射关系
 const psiOmega2Map: Record<number, string> = {
-  1: 'ψ(Ωx)',
-  2: 'ψ(Ω<sup>2</sup>x)',
-  3: 'ψ(Ω<sup>x</sup>)',
-  4: 'ψ(Ω<sup>Ω+x</sup>)',
-  5: 'ψ(Ω<sup>Ωx</sup>)',
-  6: 'ψ(Ω<sup>Ω<sup>2</sup></sup>x)',
-  7: 'ψ(Ω<sup>Ω<sup>2</sup>+x</sup>)',
-  8: 'ψ(Ω<sup>Ω<sup>2</sup>+Ωx</sup>)',
-  9: 'ψ(Ω<sup>Ω<sup>2</sup>2</sup>x)',
-  10: 'ψ(Ω<sup>Ω<sup>2</sup>2+x</sup>)',
-  11: 'ψ(Ω<sup>Ω<sup>2</sup>2+Ωx</sup>)',
-  12: 'ψ(Ω<sup>Ω<sup>2</sup>x</sup>)',
-  13: 'ψ(Ω<sup>Ω<sup>x</sup></sup>)',
+  1: 'Ω<sup>ψ(Ω<sub>2</sub>x)</sup>',
+  2: 'Ω<sup>Ω+ψ(Ω<sub>2</sub>x)</sup>',
+  3: 'Ω<sup>Ω2+ψ(Ω<sub>2</sub>x)</sup>',
+  4: 'Ω<sup>Ωψ(Ω<sub>2</sub>x)</sup>',
+  5: 'Ω<sup>Ω<sup>2</sup>+ψ(Ω<sub>2</sub>x)</sup>',
+  6: 'Ω<sup>Ω<sup>2</sup>+Ω+ψ(Ω<sub>2</sub>x)</sup>',
+  7: 'Ω<sup>Ω<sup>2</sup>+Ω2+ψ(Ω<sub>2</sub>x)</sup>',
+  8: 'Ω<sup>Ω<sup>2</sup>+Ωψ(Ω<sub>2</sub>x)</sup>',
+  9: 'Ω<sup>Ω<sup>2</sup>2+Ω+ψ(Ω<sub>2</sub>x)</sup>',
+  10: 'Ω<sup>Ω<sup>2</sup>2+Ω2+ψ(Ω<sub>2</sub>x)</sup>',
+  11: 'Ω<sup>Ω<sup>2</sup>2+Ωψ(Ω<sub>2</sub>x)</sup>',
+  12: 'Ω<sup>Ω<sup>2</sup>ψ(Ω<sub>2</sub>x)</sup>',
+  13: 'Ω<sup>Ω<sup>ψ(Ω<sub>2</sub>x)</sup></sup>',
   14: 'ψ<sub>1</sub>(Ω<sub>2</sub>x)',
   15: 'ψ<sub>1</sub>(Ω<sub>2</sub><sup>2</sup>x)',
   16: 'ψ<sub>1</sub>(Ω<sub>2</sub><sup>x</sup>)',
@@ -177,7 +177,7 @@ function convertToPsiOmega2(n: number): { result: string; error?: string } {
 
     // 获取当前位对应的映射字符串
     const level = i + 1
-    const basePattern = psiOmega2Map[level] || `😰x`
+    const basePattern = psiOmega2Map[level] || `😥x`
 
     // 根据位上的数字进行嵌套
     let nestedResult = result
@@ -185,14 +185,18 @@ function convertToPsiOmega2(n: number): { result: string; error?: string } {
       nestedResult = basePattern.replace('x', nestedResult)
     }
 
-    result = nestedResult
+    result = nestedResult.replace('<sub>1</sub>','')
   }
 
   return { result }
 }
 
 function remnant(n: number): string {
-  return n<1/8?'ω':n<2/8?'ω2':n<3/8?'ω<sup>2</sup>':n<4/8?'ω<sup>2</sup>2':n<5/8?'ω<sup>ω</sup>':n<6/8?'ω<sup>ω2</sup>':n<7/8?'ω<sup>ω<sup>2</sup></sup>':'ω<sup>ω<sup>2</sup>2</sup>'
+  return n==0?'':n<1/8?'ω':n<2/8?'ω2':n<3/8?'ω<sup>2</sup>':n<4/8?'ω<sup>2</sup>2':n<5/8?'ω<sup>ω</sup>':n<6/8?'ω<sup>ω2</sup>':n<7/8?'ω<sup>ω<sup>2</sup></sup>':'ω<sup>ω<sup>2</sup>2</sup>'
+}
+
+function remnant2(n: number): string {
+  return n==0?'':n<1/8?'ω':n<2/8?'Ω':n<3/8?'Ω<sup>ω</sup>':n<4/8?'Ω<sup>ω<sup>ω</sup></sup>':n<5/8?'Ω<sup>ψ(Ω)</sup>':n<6/8?'Ω<sup>ψ(Ω<sup>ω</sup>)</sup>':n<7/8?'Ω<sup>ψ(Ω<sup>Ω</sup>)</sup>':'Ω<sup>ψ(Ω<sup>Ω<sup>ω</sup></sup>)</sup>'
 }
 
 // 原始的继承3进制表示转换函数
@@ -332,7 +336,7 @@ function convertToInheritedTernary(n: number): { result: string; steps: Conversi
 }
 
 // 导出函数
-export { convertToInheritedTernary, convertToPsiOmega, convertToPsiOmega2, remnant, toTernary }
+export { convertToInheritedTernary, convertToPsiOmega, convertToPsiOmega2, remnant, remnant2, toTernary }
 
 // 辅助函数：格式化术语（仅用于原始继承3进制表示）
 function formatTerm(term: Term): string {

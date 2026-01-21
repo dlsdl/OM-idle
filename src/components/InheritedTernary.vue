@@ -176,7 +176,7 @@ function convert(): void {
 
 .header h1 {
   font-size: 2rem;
-  color: #333;
+  color: #ccc;
   margin-bottom: 0.5rem;
 }
 

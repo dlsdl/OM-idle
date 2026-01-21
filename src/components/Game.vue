@@ -5,8 +5,9 @@
       <h4 class="result-title">序数增量放置版</h4>
       <div class="result-content" v-if="value < 7625597484987" v-html="convertedValue"></div>
       <div class="result-content" v-if="value >= 7625597484987 && value2 < 12157665459056928801" v-html="convertedValue2"></div>
-      <div class="result-content" v-if="value2 >= 12157665459056928801">ψ(Ω<sub>2</sub>)</div>
-      <div class="result-content" v-if="value2 >= 12157665459056925000" style="color:#00ff00">
+      <div class="result-content" v-if="value2 >= 12157665459056928801 && value3 < 1.938324566768e25" v-html="convertedValue3"></div>
+      <div class="result-content" v-if="value3 >= 1.938324566768e25">ψ(Ω<sub>ω</sub>)</div>
+      <div class="result-content" v-if="value3 >= 1.938324566768e25" style="color:#00ff00">
         恭喜通关！您已到达该版本结局！
       </div>
     </div>
@@ -28,6 +29,15 @@
         @click="activeTab = 'cantor'"
       >
         康托尔化
+      </button>
+      <!-- 霍华德化选项卡，仅在满足条件时显示 -->
+      <button 
+        v-if="value2 >= 12157665459056928801 || hasHowardefied" 
+        class="tab-button" 
+        :class="{ active: activeTab === 'howard' }" 
+        @click="activeTab = 'howard'"
+      >
+        霍华德化
       </button>
       <button 
         class="tab-button" 
@@ -92,7 +102,8 @@
         </button>
 
         <div class="current-value">
-          康托尔点: {{ formatNumber(cantorPoints) }}(总计{{ formatNumber(totalCantorPoints) }}) | 序数点2: {{ formatNumber(value2) }} | 增幅: {{ formatNumber(incrementy) }}<br />
+          康托尔点: {{ formatNumber(cantorPoints) }}(总计{{ formatNumber(totalCantorPoints) }})<br />
+          序数点2: {{ formatNumber(value2) }} | 增幅: {{ formatNumber(incrementy) }}<br />
           总计康托尔点使自动器速度×{{ formatNumber(Math.sqrt(totalCantorPoints * 8 + 1)) }}<br />
           增幅使所有自动器速度×{{ formatNumber(incrementy + 1) }}
         </div><br />
@@ -102,7 +113,7 @@
           <h2>康托尔自动器</h2>
           <div class="upgrade-info">
             <div class="stat">等级: {{ cantorUpgrades.cantorAutomator }}</div>
-            <div class="stat">效果: {{ formatNumber(cantorUpgrades.cantorAutomator/10) }} × {{ formatNumber(Math.pow(2, cantorUpgrades.cantorAmplifier)) }} × {{ formatNumber(1+incrementy) }}/s</div>
+            <div class="stat">效果: {{ formatNumber(cantorUpgrades.cantorAutomator/3) }} × {{ formatNumber(Math.pow(2, cantorUpgrades.cantorAmplifier)) }} × {{ formatNumber(1+incrementy) }}/s</div>
             <div class="stat">升级成本: {{ formatNumber(cantorAutomatorCost) }}</div>
           </div>
           <button 
@@ -119,7 +130,7 @@
           <h2>康托尔加速器</h2>
           <div class="upgrade-info">
             <div class="stat">等级: {{ cantorUpgrades.cantorAmplifier }}</div>
-            <div class="stat">效果: 康托尔自动器速度 × {{ formatNumber(Math.pow(2, cantorUpgrades.cantorAmplifier)) }}</div>
+            <div class="stat">效果: 康托尔自动器 × {{ formatNumber(Math.pow(2, cantorUpgrades.cantorAmplifier)) }}</div>
             <div class="stat">升级成本: {{ formatNumber(cantorAmplifierCost) }}</div>
           </div>
           <button 
@@ -136,7 +147,7 @@
           <h2>增幅获取</h2>
           <div class="upgrade-info">
             <div class="stat">等级: {{ cantorUpgrades.unlockIncrement }}</div>
-            <div class="stat">效果: {{ formatNumber(cantorUpgrades.unlockIncrement/10) }} × {{ Math.pow(2,cantorUpgrades.multIncrement) }}/s</div>
+            <div class="stat">效果: {{ formatNumber(cantorUpgrades.unlockIncrement/3) }} × {{ Math.pow(2,cantorUpgrades.multIncrement) }}/s</div>
             <div class="stat">升级成本: {{ formatNumber(unlockIncrementCost) }}</div>
           </div>
           <button 
@@ -153,13 +164,137 @@
           <h2>增加增幅获取</h2>
           <div class="upgrade-info">
             <div class="stat">等级: {{ cantorUpgrades.multIncrement }}</div>
-            <div class="stat">效果: 增幅获取速度 × {{ formatNumber(Math.pow(2,cantorUpgrades.multIncrement)) }}</div>
+            <div class="stat">效果: 增幅获取 × {{ formatNumber(Math.pow(2,cantorUpgrades.multIncrement)) }}</div>
             <div class="stat">升级成本: {{ formatNumber(multIncrementCost) }}</div>
           </div>
           <button 
             class="upgrade-button2" 
             @click="upgradeMultIncrement" 
             :disabled="cantorPoints < multIncrementCost"
+          >
+            升级
+          </button>
+        </div>
+      </div>
+
+      <!-- 霍华德化选项卡 -->
+      <div v-if="activeTab === 'howard'" class="upgrade-tab">
+        <!-- 霍华德化重置按钮，仅在数值2达到阈值时显示 -->
+        <button v-if="value2 >= 12157665459056928801" 
+            class="upgrade-button3"
+            @click="howardify"
+          >
+          <h2>霍华德化重置</h2>
+          <div>重置序数、自动器、加速器、康托尔化相关内容</div>
+          <div>+ {{ formatNumber(Math.max(value3,1)) }} 霍华德点</div>
+        </button>
+
+        <div class="current-value">
+          霍华德点: {{ formatNumber(howardPoints) }}(总计{{ formatNumber(totalHowardPoints) }})<br />
+          序数点3: {{ formatNumber(value3) }}<br />
+          阿列夫能量: {{ formatNumber(alephPower) }} | 奇点能量: {{ formatNumber(singularityPower) }}<br />
+          总霍华德点使前两种自动器速度×{{ formatNumber(Math.sqrt(totalHowardPoints * 80 + 1)) }}<br />
+          阿列夫能量使所有自动器速度×{{ formatNumber(alephPower + 1) }}<br />
+          奇点能量使阿列夫能量产量×{{ formatNumber(singularityPower + 1) }}<br />
+        </div><br />
+
+        <!-- 霍华德自动器 -->
+        <div class="upgrade-card3">
+          <h2>霍华德自动器</h2>
+          <div class="upgrade-info">
+            <div class="stat">等级: {{ howardUpgrades.howardAutomator }}</div>
+            <div class="stat">效果: {{ formatNumber(howardUpgrades.howardAutomator/10) }} × {{ formatNumber(Math.pow(2, howardUpgrades.howardAmplifier)) }}/s</div>
+            <div class="stat">升级成本: {{ formatNumber(howardAutomatorCost) }}</div>
+          </div>
+          <button 
+            class="upgrade-button3" 
+            @click="upgradeHowardAutomator" 
+            :disabled="howardPoints < howardAutomatorCost"
+          >
+            升级
+          </button>
+        </div>
+
+        <!-- 霍华德增幅器 -->
+        <div class="upgrade-card3">
+          <h2>霍华德增幅器</h2>
+          <div class="upgrade-info">
+            <div class="stat">等级: {{ howardUpgrades.howardAmplifier }}</div>
+            <div class="stat">效果: 霍华德自动器速度 × {{ formatNumber(Math.pow(2, howardUpgrades.howardAmplifier)) }}</div>
+            <div class="stat">升级成本: {{ formatNumber(howardAmplifierCost) }}</div>
+          </div>
+          <button 
+            class="upgrade-button3" 
+            @click="upgradeHowardAmplifier" 
+            :disabled="howardPoints < howardAmplifierCost"
+          >
+            升级
+          </button>
+        </div>
+
+        <!-- 解锁阿列夫 -->
+        <div class="upgrade-card3">
+          <h2>解锁阿列夫</h2>
+          <div class="upgrade-info">
+            <div class="stat">等级: {{ howardUpgrades.unlockAleph }}</div>
+            <div class="stat">效果: {{ formatNumber(howardUpgrades.unlockAleph/10) }} × {{ Math.pow(2,howardUpgrades.alephMultiplier) }}/s</div>
+            <div class="stat">升级成本: {{ formatNumber(unlockAlephCost) }}</div>
+          </div>
+          <button 
+            class="upgrade-button3" 
+            @click="upgradeUnlockAleph" 
+            :disabled="howardPoints < unlockAlephCost"
+          >
+            升级
+          </button>
+        </div>
+
+        <!-- 阿列夫倍数 -->
+        <div class="upgrade-card3">
+          <h2>阿列夫倍数</h2>
+          <div class="upgrade-info">
+            <div class="stat">等级: {{ howardUpgrades.alephMultiplier }}</div>
+            <div class="stat">效果: 阿列夫能量获取 × {{ formatNumber(Math.pow(2,howardUpgrades.alephMultiplier)) }}</div>
+            <div class="stat">升级成本: {{ formatNumber(alephMultiplierCost) }}</div>
+          </div>
+          <button 
+            class="upgrade-button3" 
+            @click="upgradeAlephMultiplier" 
+            :disabled="howardPoints < alephMultiplierCost"
+          >
+            升级
+          </button>
+        </div>
+
+        <!-- 解锁奇点 -->
+        <div class="upgrade-card3">
+          <h2>解锁奇点</h2>
+          <div class="upgrade-info">
+            <div class="stat">等级: {{ howardUpgrades.unlockSingularity }}</div>
+            <div class="stat">效果: {{ formatNumber(howardUpgrades.unlockSingularity/10) }} × {{ Math.pow(2,howardUpgrades.singularityMultiplier) }}/s</div>
+            <div class="stat">升级成本: {{ formatNumber(unlockSingularityCost) }}</div>
+          </div>
+          <button 
+            class="upgrade-button3" 
+            @click="upgradeUnlockSingularity" 
+            :disabled="howardPoints < unlockSingularityCost"
+          >
+            升级
+          </button>
+        </div>
+
+        <!-- 奇点倍数 -->
+        <div class="upgrade-card3">
+          <h2>奇点倍数</h2>
+          <div class="upgrade-info">
+            <div class="stat">等级: {{ howardUpgrades.singularityMultiplier }}</div>
+            <div class="stat">效果: 奇点能量获取 × {{ formatNumber(Math.pow(2,howardUpgrades.singularityMultiplier)) }}</div>
+            <div class="stat">升级成本: {{ formatNumber(singularityMultiplierCost) }}</div>
+          </div>
+          <button 
+            class="upgrade-button3" 
+            @click="upgradeSingularityMultiplier" 
+            :disabled="howardPoints < singularityMultiplierCost"
           >
             升级
           </button>
@@ -236,7 +371,7 @@
 <script setup lang="ts">
 // 为解决“找不到模块 vue 或其类型声明”问题，保持原有导入即可
 import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { convertToInheritedTernary, convertToPsiOmega, remnant } from '../utils/inheritedTernary'
+import { convertToInheritedTernary, convertToPsiOmega, convertToPsiOmega2, remnant, remnant2 } from '../utils/inheritedTernary'
 
 // 游戏状态
 const value = ref(1)
@@ -245,7 +380,7 @@ const amplifierLevel = ref(0)
 const activeTab = ref('upgrade')
 const musicEnabled = ref(true)
 const saveImportInput = ref<HTMLInputElement | null>(null)
-const refreshRate = ref(50) // 刷新率，单位ms
+const refreshRate = ref(30) // 刷新率，单位ms
 const currentMusicIndex = ref(0) // 当前音乐索引
 
 // 康托尔化相关状态
@@ -259,7 +394,24 @@ const cantorUpgrades = ref({
   cantorAutomator: 0, // 康托尔自动器等级
   cantorAmplifier: 0, // 康托尔增幅器等级
   unlockIncrement: 0, // 解锁增幅等级
-  multIncrement: 0 // 第二数值对增幅获取速度的影响系数
+  multIncrement: 0 // 增幅乘数等级
+})
+
+// 霍华德化相关状态
+const hasHowardefied = ref(false) // 标识是否已进行过霍华德化
+const howardPoints = ref(0) // 霍华德点
+const totalHowardPoints = ref(0) // 总霍华德点
+const value3 = ref(1) // 第三数值
+const alephPower = ref(0) // 阿列夫能量
+const singularityPower = ref(0) // 奇点能量
+// 霍华德升级信息
+const howardUpgrades = ref({
+  howardAutomator: 0, // 霍华德自动器等级
+  howardAmplifier: 0, // 霍华德增幅器等级
+  unlockAleph: 0, // 解锁阿列夫等级
+  alephMultiplier: 0, // 阿列夫倍数等级
+  unlockSingularity: 0, // 解锁奇点等级
+  singularityMultiplier: 0 // 奇点倍数等级
 })
 
 // 音乐列表
@@ -291,17 +443,32 @@ let gameLoop: number | null = null
 
 // 计算属性 - 原始数值生产速度
 const productionPerSecond = computed(() => {
-  return automatorLevel.value * Math.pow(2, amplifierLevel.value) * Math.sqrt(totalCantorPoints.value*8 + 1) * (1 + incrementy.value)
+  return automatorLevel.value * Math.pow(2, amplifierLevel.value) * Math.sqrt(totalCantorPoints.value*8 + 1) * (1 + incrementy.value) * Math.sqrt(totalHowardPoints.value * 80 + 1) * (alephPower.value + 1)
 })
 
 // 计算属性 - 康托尔自动器生产速度
 const cantorProductionPerSecond = computed(() => {
-  return cantorUpgrades.value.cantorAutomator * Math.pow(2, cantorUpgrades.value.cantorAmplifier) * (1 + incrementy.value) / 10
+  return cantorUpgrades.value.cantorAutomator * Math.pow(2, cantorUpgrades.value.cantorAmplifier) * (1 + incrementy.value) * Math.sqrt(totalHowardPoints.value * 80 + 1) * (alephPower.value + 1) / 3
 })
 
 // 计算属性 - 增幅生产速度
 const incrementProductionPerSecond = computed(() => {
-  return cantorUpgrades.value.unlockIncrement * Math.pow(2, cantorUpgrades.value.multIncrement) / 10
+  return cantorUpgrades.value.unlockIncrement * Math.pow(2, cantorUpgrades.value.multIncrement) / 3
+})
+
+// 计算属性 - 霍华德自动器生产速度
+const howardProductionPerSecond = computed(() => {
+  return howardUpgrades.value.howardAutomator * Math.pow(2, howardUpgrades.value.howardAmplifier) * (alephPower.value + 1) / 9
+})
+
+// 计算属性 - 阿列夫能量生产速度
+const alephProductionPerSecond = computed(() => {
+  return howardUpgrades.value.unlockAleph * Math.pow(2, howardUpgrades.value.alephMultiplier) * (singularityPower.value + 1) / 9
+})
+
+// 计算属性 - 奇点能量生产速度
+const singularityProductionPerSecond = computed(() => {
+  return howardUpgrades.value.unlockSingularity * Math.pow(2, howardUpgrades.value.singularityMultiplier) / 9
 })
 
 // 计算属性 - 升级成本
@@ -310,7 +477,7 @@ const automatorCost = computed(() => {
 })
 
 const amplifierCost = computed(() => {
-  return Math.pow(2.5, amplifierLevel.value + 4)
+  return Math.pow(2.5, amplifierLevel.value)*40
 })
 
 // 计算属性 - 康托尔升级成本
@@ -323,11 +490,36 @@ const cantorAmplifierCost = computed(() => {
 })
 
 const unlockIncrementCost = computed(() => {
-  return Math.pow(6, cantorUpgrades.value.unlockIncrement)*1600
+  return Math.pow(5, cantorUpgrades.value.unlockIncrement)*1600
 })
 
 const multIncrementCost = computed(() => {
-  return Math.pow(8, cantorUpgrades.value.multIncrement)*64000
+  return Math.pow(6, cantorUpgrades.value.multIncrement)*64000
+})
+
+// 计算属性 - 霍华德升级成本
+const howardAutomatorCost = computed(() => {
+  return Math.pow(8, howardUpgrades.value.howardAutomator)
+})
+
+const howardAmplifierCost = computed(() => {
+  return Math.pow(10, howardUpgrades.value.howardAmplifier)*40
+})
+
+const unlockAlephCost = computed(() => {
+  return Math.pow(12, howardUpgrades.value.unlockAleph)*1600
+})
+
+const alephMultiplierCost = computed(() => {
+  return Math.pow(16, howardUpgrades.value.alephMultiplier)*64000
+})
+
+const unlockSingularityCost = computed(() => {
+  return Math.pow(20, howardUpgrades.value.unlockSingularity)*2560000
+})
+
+const singularityMultiplierCost = computed(() => {
+  return Math.pow(24, howardUpgrades.value.singularityMultiplier)*102400000
 })
 
 const convertedValue = computed(() => {
@@ -340,6 +532,11 @@ const convertedValue2 = computed(() => {
   return result
 })
 
+const convertedValue3 = computed(() => {
+  const result = convertToPsiOmega2(Math.floor(value3.value+1594322)).result.replace('x', remnant2(value3.value - Math.floor(value3.value)))
+  return result
+})
+
 // 格式化数字
 const formatNumber = (num: number): string => {
   if (num < 1000) return num.toFixed(3)
@@ -348,7 +545,9 @@ const formatNumber = (num: number): string => {
   if (num < 1000000000000) return (num / 1000000000).toFixed(3) + 'B'
   if (num < 1e15) return (num / 1e12).toFixed(3) + 'T'
   if (num < 1e18) return (num / 1e15).toFixed(3) + 'Qa'
-  return (num / 1e18).toFixed(3) + 'Qi'
+  if (num < 1e21) return (num / 1e18).toFixed(3) + 'Qi'
+  if (num < 1e24) return (num / 1e21).toFixed(3) + 'Sx'
+  return (num / 1e24).toFixed(3) + 'Sp'
 }
 
 // 游戏循环
@@ -375,6 +574,25 @@ const startGameLoop = () => {
     // 更新增幅值（仅当已进行过康托尔化时）
     if (hasCantorified.value) {
       incrementy.value += incrementProductionPerSecond.value / (1000 / updateInterval)
+    }
+
+    // 更新第三数值（仅当已进行过霍华德化时）
+    if (hasHowardefied.value && value2.value >= 12157665459056928801) {
+      if (value3.value < 1.938324566768e25) {
+        value3.value += howardProductionPerSecond.value / (1000 / updateInterval)
+      } else {
+        value3.value = 1.938324566768e25
+      }
+    }
+
+    // 更新阿列夫能量（仅当已进行过霍华德化时）
+    if (hasHowardefied.value) {
+      alephPower.value += alephProductionPerSecond.value / (1000 / updateInterval)
+    }
+
+    // 更新奇点能量（仅当已进行过霍华德化时）
+    if (hasHowardefied.value) {
+      singularityPower.value += singularityProductionPerSecond.value / (1000 / updateInterval)
     }
   }, updateInterval)
 }
@@ -439,6 +657,42 @@ const cantorify = () => {
   }
 }
 
+// 霍华德化核心功能
+const howardify = () => {
+  // 检查条件：数值2达到阈值
+  if (value2.value >= 12157665459056928801) {
+    // 标记已进行过霍华德化
+    hasHowardefied.value = true
+    
+    // 获得霍华德点奖励
+    howardPoints.value += Math.max(1,value3.value)
+    totalHowardPoints.value += Math.max(1,value3.value)
+    
+    // 重置游戏状态
+    value.value = 1
+    value2.value = 1
+    value3.value = 1
+    automatorLevel.value = 0
+    amplifierLevel.value = 0
+    cantorPoints.value = 0
+    totalCantorPoints.value = 0
+    incrementy.value = 0
+    alephPower.value = 0
+    singularityPower.value = 0
+    
+    // 重置康托尔升级
+    cantorUpgrades.value = {
+      cantorAutomator: 0,
+      cantorAmplifier: 0,
+      unlockIncrement: 0,
+      multIncrement: 0
+    }
+    
+    // 保存游戏状态
+    saveGame()
+  }
+}
+
 // 康托尔升级函数
 const upgradeCantorAutomator = () => {
   if (cantorPoints.value >= cantorAutomatorCost.value) {
@@ -472,6 +726,55 @@ const upgradeMultIncrement = () => {
   }
 }
 
+// 霍华德升级函数
+const upgradeHowardAutomator = () => {
+  if (howardPoints.value >= howardAutomatorCost.value) {
+    howardPoints.value -= howardAutomatorCost.value
+    howardUpgrades.value.howardAutomator++
+    saveGame()
+  }
+}
+
+const upgradeHowardAmplifier = () => {
+  if (howardPoints.value >= howardAmplifierCost.value) {
+    howardPoints.value -= howardAmplifierCost.value
+    howardUpgrades.value.howardAmplifier++
+    saveGame()
+  }
+}
+
+const upgradeUnlockAleph = () => {
+  if (howardPoints.value >= unlockAlephCost.value) {
+    howardPoints.value -= unlockAlephCost.value
+    howardUpgrades.value.unlockAleph++
+    saveGame()
+  }
+}
+
+const upgradeAlephMultiplier = () => {
+  if (howardPoints.value >= alephMultiplierCost.value) {
+    howardPoints.value -= alephMultiplierCost.value
+    howardUpgrades.value.alephMultiplier++
+    saveGame()
+  }
+}
+
+const upgradeUnlockSingularity = () => {
+  if (howardPoints.value >= unlockSingularityCost.value) {
+    howardPoints.value -= unlockSingularityCost.value
+    howardUpgrades.value.unlockSingularity++
+    saveGame()
+  }
+}
+
+const upgradeSingularityMultiplier = () => {
+  if (howardPoints.value >= singularityMultiplierCost.value) {
+    howardPoints.value -= singularityMultiplierCost.value
+    howardUpgrades.value.singularityMultiplier++
+    saveGame()
+  }
+}
+
 // 存档功能
 const saveGame = () => {
   const saveData = {
@@ -488,7 +791,15 @@ const saveGame = () => {
     totalCantorPoints: totalCantorPoints.value,
     value2: value2.value,
     incrementy: incrementy.value,
-    cantorUpgrades: cantorUpgrades.value
+    cantorUpgrades: cantorUpgrades.value,
+    // 霍华德化相关数据
+    hasHowardefied: hasHowardefied.value,
+    howardPoints: howardPoints.value,
+    totalHowardPoints: totalHowardPoints.value,
+    value3: value3.value,
+    alephPower: alephPower.value,
+    singularityPower: singularityPower.value,
+    howardUpgrades: howardUpgrades.value
   }
   localStorage.setItem('inheritedTernaryGame', JSON.stringify(saveData))
 }
@@ -516,10 +827,27 @@ const loadGame = () => {
       unlockIncrement: 0,
       multIncrement: 0
     }
+    
+    // 加载霍华德化相关数据
+    hasHowardefied.value = data.hasHowardefied || false
+    howardPoints.value = data.howardPoints || 0
+    totalHowardPoints.value = data.totalHowardPoints || 0
+    value3.value = data.value3 || 0
+    alephPower.value = data.alephPower || 0
+    singularityPower.value = data.singularityPower || 0
+    howardUpgrades.value = data.howardUpgrades || {
+      howardAutomator: 0,
+      howardAmplifier: 0,
+      unlockAleph: 0,
+      alephMultiplier: 0,
+      unlockSingularity: 0,
+      singularityMultiplier: 0
+    }
   }
 }
 
 const exportSave = () => {
+  saveGame()
   const saveData = localStorage.getItem('inheritedTernaryGame')
   if (saveData) {
     const blob = new Blob([saveData], { type: 'application/json' })
@@ -561,6 +889,22 @@ const handleFileImport = (event: Event) => {
           multIncrement: 0
         }
         
+        // 加载霍华德化相关数据
+        hasHowardefied.value = saveData.hasHowardefied || false
+        howardPoints.value = saveData.howardPoints || 0
+        totalHowardPoints.value = saveData.totalHowardPoints || 0
+        value3.value = saveData.value3 || 0
+        alephPower.value = saveData.alephPower || 0
+        singularityPower.value = saveData.singularityPower || 0
+        howardUpgrades.value = saveData.howardUpgrades || {
+          howardAutomator: 0,
+          howardAmplifier: 0,
+          unlockAleph: 0,
+          alephMultiplier: 0,
+          unlockSingularity: 0,
+          singularityMultiplier: 0
+        }
+        
         saveGame()
         alert('存档导入成功')
       } catch (error) {
@@ -589,6 +933,22 @@ const resetGame = () => {
       cantorAmplifier: 0,
       unlockIncrement: 0,
       multIncrement: 0
+    }
+    
+    // 重置霍华德化相关数据
+    hasHowardefied.value = false
+    howardPoints.value = 0
+    totalHowardPoints.value = 0
+    value3.value = 1
+    alephPower.value = 0
+    singularityPower.value = 0
+    howardUpgrades.value = {
+      howardAutomator: 0,
+      howardAmplifier: 0,
+      unlockAleph: 0,
+      alephMultiplier: 0,
+      unlockSingularity: 0,
+      singularityMultiplier: 0
     }
     
     localStorage.removeItem('inheritedTernaryGame')
@@ -798,6 +1158,53 @@ onUnmounted(() => {
   color: #10c200;
   margin-bottom: 1.5rem;
   text-align: center;
+}
+
+/* 霍华德化升级卡片样式 */
+.upgrade-card3 {
+  background: #1a1a2e;
+  padding: 2rem;
+  border-radius: 10px;
+  width: 300px;
+  border: 2px solid #0f3460;
+  transition: all 0.3s;
+}
+
+.upgrade-card3:hover {
+  transform: translateY(-5px);
+  border-color: #00b7c2;
+  box-shadow: 0 10px 30px rgba(233, 69, 96, 0.2);
+}
+
+.upgrade-card3 h2 {
+  color: #00b7c2;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+/* 霍华德化升级按钮样式 */
+.upgrade-button3 {
+  width: 100%;
+  padding: 1rem;
+  background: #00b7c2;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-weight: bold;
+}
+
+.upgrade-button3:hover:not(:disabled) {
+  background: #00b7c2;
+  transform: scale(1.05);
+}
+
+.upgrade-button3:disabled {
+  background: #444;
+  cursor: not-allowed;
+  opacity: 0.5;
 }
 
 .upgrade-info {
